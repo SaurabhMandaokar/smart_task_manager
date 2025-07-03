@@ -21,11 +21,11 @@
     "status": "to-do"
   },
   {
-    "title": "Plan vacation",
+    "title": "Plan vacation as",
     "dueDate": "2025-07-12",
     "description": "Book flights and hotels",
-    "priority": "medium",
-    "status": "to-do"
+    "priority": "",
+    "status": "done"
   },
   {
     "title": "Renew domain name",
