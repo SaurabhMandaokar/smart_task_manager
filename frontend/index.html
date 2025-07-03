@@ -16,6 +16,22 @@
       margin-bottom: 20px;
     }
 
+    .priority-bar {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #3a1e1e;
+      border-radius: 5px;
+    }
+
+    .priority-bar h3 {
+      min-width: 120px;
+      margin-right: 10px;
+      color: #ff6666;
+    }
+
     .column-container {
       display: flex;
       overflow-x: auto;
@@ -78,6 +94,12 @@
 <body>
   <h1>🧠 TASKS</h1>
 
+  <!-- Priority Tasks Horizontal Bar -->
+  <div class="priority-bar" id="priorityBar">
+    <h3>🔥 Priority</h3>
+  </div>
+
+  <!-- 5 Vertical Columns -->
   <div class="column-container">
     <div id="past" class="column"><h3>Past</h3></div>
     <div id="lastWeek" class="column"><h3>Last Week</h3></div>
@@ -121,6 +143,7 @@
         const column = document.getElementById(id);
         column.innerHTML = `<h3>${column.querySelector('h3')?.textContent || ''}</h3>`;
       });
+      document.getElementById("priorityBar").innerHTML = `<h3>🔥 Priority</h3>`;
 
       const today = new Date();
       const getWeekStart = (date, offset) => {
@@ -148,7 +171,10 @@
           document.getElementById('taskFormContainer').style.display = 'block';
         };
 
-        if (taskDate < lastWeekStart) {
+        // Place task in priority bar if it's ASAP
+        if (task.priority === 'ASAP') {
+          document.getElementById('priorityBar').appendChild(taskBox);
+        } else if (taskDate < lastWeekStart) {
           document.getElementById('past').appendChild(taskBox);
         } else if (taskDate >= lastWeekStart && taskDate < thisWeekStart) {
           document.getElementById('lastWeek').appendChild(taskBox);
