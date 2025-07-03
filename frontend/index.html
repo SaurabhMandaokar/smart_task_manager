@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Task Board</title>
+
+  <!-- Flatpickr Date Picker CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
   <style>
     body {
       background: #1e1e1e;
@@ -112,7 +116,7 @@
 
   <div id="taskFormContainer" style="display:none;">
     <input id="taskTitle" placeholder="Title" />
-    <input id="taskDueDate" type="date" />
+    <input id="taskDueDate" placeholder="Due Date" />
     <input id="taskDesc" placeholder="Description" />
     <select id="taskPriority">
       <option value="Low">Low</option>
@@ -127,9 +131,16 @@
     <button onclick="saveTask()">Save Task</button>
   </div>
 
+  <!-- Flatpickr JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
   <script>
     const tasks = [];
     let selectedTaskIndex = null;
+
+    flatpickr("#taskDueDate", {
+      dateFormat: "Y-m-d"
+    });
 
     async function fetchTasks() {
       const res = await fetch('/tasks');
@@ -171,7 +182,6 @@
           document.getElementById('taskFormContainer').style.display = 'block';
         };
 
-        // Place task in priority bar if it's ASAP
         if (task.priority === 'ASAP') {
           document.getElementById('priorityBar').appendChild(taskBox);
         } else if (taskDate < lastWeekStart) {
