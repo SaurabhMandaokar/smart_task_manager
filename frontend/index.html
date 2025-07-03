@@ -5,7 +5,7 @@
   <title>Task Board</title>
   <style>
     body { background: #1e1e1e; color: white; font-family: sans-serif; }
-    .task { background: #333; padding: 10px; margin: 5px; border-radius: 5px; }
+    .task { background: #333; padding: 10px; margin: 5px; border-radius: 5px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -17,6 +17,7 @@
   <div id="nextWeek"></div>
   <div id="future"></div>
   <button id="createTaskBtn">Create Task</button>
+
   <div id="taskFormContainer" style="display:none;">
     <input id="taskTitle" placeholder="Title" />
     <input id="taskDueDate" type="date" />
@@ -31,11 +32,12 @@
       <option value="in-progress">In Progress</option>
       <option value="done">Done</option>
     </select>
-    <button onclick="addTask()">Add Task</button>
+    <button onclick="saveTask()">Save Task</button>
   </div>
 
   <script>
     const tasks = [];
+    let selectedTaskIndex = null;
 
     async function fetchTasks() {
       const res = await fetch('/tasks');
@@ -60,11 +62,21 @@
       const nextWeekStart = getWeekStart(today, 1);
       const lastWeekStart = getWeekStart(today, -1);
 
-      tasks.forEach(task => {
+      tasks.forEach((task, i) => {
         const taskDate = new Date(task.dueDate);
         const taskBox = document.createElement('div');
         taskBox.className = 'task' + (task.priority === 'ASAP' ? ' asap' : '');
         taskBox.innerHTML = `<strong>${task.title}</strong><br/><small>${task.dueDate} – ${task.priority} – ${task.status}</small>`;
+
+        taskBox.onclick = () => {
+          selectedTaskIndex = i;
+          document.getElementById('taskTitle').value = task.title;
+          document.getElementById('taskDueDate').value = task.dueDate;
+          document.getElementById('taskDesc').value = task.description;
+          document.getElementById('taskPriority').value = task.priority;
+          document.getElementById('taskStatus').value = task.status;
+          document.getElementById('taskFormContainer').style.display = 'block';
+        };
 
         if (task.priority === 'ASAP') {
           document.getElementById('priorityBar').appendChild(taskBox);
@@ -82,7 +94,7 @@
       });
     }
 
-    async function addTask() {
+    async function saveTask() {
       const task = {
         title: document.getElementById('taskTitle').value,
         dueDate: document.getElementById('taskDueDate').value,
@@ -91,21 +103,39 @@
         status: document.getElementById('taskStatus').value
       };
 
-      const res = await fetch('/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task)
-      });
-
-      if (res.ok) {
-        tasks.push(task);
-        displayTasks();
-        document.getElementById('taskFormContainer').style.display = 'none';
+      if (selectedTaskIndex !== null) {
+        const res = await fetch(`/tasks/${selectedTaskIndex}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task)
+        });
+        if (res.ok) {
+          tasks[selectedTaskIndex] = task;
+        }
+      } else {
+        const res = await fetch('/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task)
+        });
+        if (res.ok) {
+          tasks.push(task);
+        }
       }
+
+      displayTasks();
+      document.getElementById('taskFormContainer').style.display = 'none';
+      selectedTaskIndex = null;
     }
 
     document.getElementById('createTaskBtn').onclick = () => {
       document.getElementById('taskFormContainer').style.display = 'block';
+      selectedTaskIndex = null;
+      document.getElementById('taskTitle').value = '';
+      document.getElementById('taskDueDate').value = '';
+      document.getElementById('taskDesc').value = '';
+      document.getElementById('taskPriority').value = 'Medium';
+      document.getElementById('taskStatus').value = 'to-do';
     };
 
     fetchTasks();
