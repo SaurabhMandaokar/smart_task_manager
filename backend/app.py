@@ -34,5 +34,13 @@ def add_task():
     save_tasks()
     return jsonify({"status": "success", "task": task})
 
+@app.route("/tasks/<int:index>", methods=["PUT"])
+def update_task(index):
+    if 0 <= index < len(tasks):
+        tasks[index] = request.json
+        save_tasks()
+        return jsonify({"status": "success", "task": tasks[index]})
+    return jsonify({"status": "error", "message": "Task not found"}), 404
+
 if __name__ == "__main__":
     app.run(debug=True)
