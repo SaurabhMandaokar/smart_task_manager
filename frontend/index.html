@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Board</title>
+  <style>
+    body { background: #1e1e1e; color: white; font-family: sans-serif; }
+    .task { background: #333; padding: 10px; margin: 5px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🧠 TASKS</h1>
+  <div id="priorityBar"></div>
+  <div id="past"></div>
+  <div id="lastWeek"></div>
+  <div id="thisWeek"></div>
+  <div id="nextWeek"></div>
+  <div id="future"></div>
+  <button id="createTaskBtn">Create Task</button>
+  <div id="taskFormContainer" style="display:none;">
+    <input id="taskTitle" placeholder="Title" />
+    <input id="taskDueDate" type="date" />
+    <input id="taskDesc" placeholder="Description" />
+    <select id="taskPriority">
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="ASAP">ASAP</option>
+    </select>
+    <select id="taskStatus">
+      <option value="to-do">To Do</option>
+      <option value="in-progress">In Progress</option>
+      <option value="done">Done</option>
+    </select>
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <script>
+    const tasks = [];
+
+    async function fetchTasks() {
+      const res = await fetch('/tasks');
+      const data = await res.json();
+      tasks.splice(0, tasks.length, ...data);
+      displayTasks();
+    }
+
+    function displayTasks() {
+      ["past", "lastWeek", "thisWeek", "nextWeek", "future", "priorityBar"].forEach(id => {
+        const column = document.getElementById(id);
+        column.innerHTML = "";
+      });
+
+      const today = new Date();
+      const getWeekStart = (date, offset) => {
+        const d = new Date(date);
+        d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7));
+        return d;
+      };
+      const thisWeekStart = getWeekStart(today, 0);
+      const nextWeekStart = getWeekStart(today, 1);
+      const lastWeekStart = getWeekStart(today, -1);
+
+      tasks.forEach(task => {
+        const taskDate = new Date(task.dueDate);
+        const taskBox = document.createElement('div');
+        taskBox.className = 'task' + (task.priority === 'ASAP' ? ' asap' : '');
+        taskBox.innerHTML = `<strong>${task.title}</strong><br/><small>${task.dueDate} – ${task.priority} – ${task.status}</small>`;
+
+        if (task.priority === 'ASAP') {
+          document.getElementById('priorityBar').appendChild(taskBox);
+        } else if (taskDate < lastWeekStart) {
+          document.getElementById('past').appendChild(taskBox);
+        } else if (taskDate >= lastWeekStart && taskDate < thisWeekStart) {
+          document.getElementById('lastWeek').appendChild(taskBox);
+        } else if (taskDate >= thisWeekStart && taskDate < nextWeekStart) {
+          document.getElementById('thisWeek').appendChild(taskBox);
+        } else if (taskDate >= nextWeekStart && taskDate < getWeekStart(today, 2)) {
+          document.getElementById('nextWeek').appendChild(taskBox);
+        } else {
+          document.getElementById('future').appendChild(taskBox);
+        }
+      });
+    }
+
+    async function addTask() {
+      const task = {
+        title: document.getElementById('taskTitle').value,
+        dueDate: document.getElementById('taskDueDate').value,
+        description: document.getElementById('taskDesc').value,
+        priority: document.getElementById('taskPriority').value,
+        status: document.getElementById('taskStatus').value
+      };
+
+      const res = await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task)
+      });
+
+      if (res.ok) {
+        tasks.push(task);
+        displayTasks();
+        document.getElementById('taskFormContainer').style.display = 'none';
+      }
+    }
+
+    document.getElementById('createTaskBtn').onclick = () => {
+      document.getElementById('taskFormContainer').style.display = 'block';
+    };
+
+    fetchTasks();
+  </script>
+</body>
+</html>
