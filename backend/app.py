@@ -66,4 +66,4 @@ def update_task(page_id):
     return jsonify({"status": "updated"})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5050)

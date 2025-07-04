@@ -23,9 +23,16 @@
       color: #e5e7eb !important;
       border: 1px solid #374151 !important;
     }
+    #overlay {
+      transition: all 0.3s ease;
+    }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6">
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6 relative">
+
+  <!-- Today's Date -->
+  <div class="absolute top-6 left-6 text-sm text-gray-400" id="todayDate"></div>
+
   <h1 class="text-3xl font-bold mb-8 text-center">🧠 TASKS</h1>
 
   <!-- Priority Tasks Horizontal Bar -->
@@ -44,21 +51,44 @@
 
   <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Create Task</button>
 
-  <div id="taskFormContainer" class="mt-6 p-6 bg-gray-800 rounded-lg shadow-lg hidden max-w-md mx-auto">
-    <input id="taskTitle" placeholder="Title" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <input id="taskDesc" placeholder="Description" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <select id="taskPriority" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <option value="Low">Low</option>
-      <option value="Medium">Medium</option>
-      <option value="ASAP">ASAP</option>
-    </select>
-    <select id="taskStatus" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <option value="to-do">To Do</option>
-      <option value="in-progress">In Progress</option>
-      <option value="done">Done</option>
-    </select>
-    <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
+  <!-- Modal Overlay for Task Form -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+    <div id="taskFormContainer" class="p-6 bg-gray-800 rounded-lg shadow-lg w-full max-w-md space-y-4">
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Title</label>
+        <input id="taskTitle" placeholder="Title" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Due Date</label>
+        <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Description</label>
+        <textarea id="taskDesc" placeholder="Description" rows="4" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Priority</label>
+        <select id="taskPriority" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="ASAP">ASAP</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Status</label>
+        <select id="taskStatus" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="to-do">To Do</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+
+      <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -131,7 +161,7 @@
           document.getElementById('taskDesc').value = task.description;
           document.getElementById('taskPriority').value = task.priority;
           document.getElementById('taskStatus').value = task.status;
-          document.getElementById('taskFormContainer').classList.remove('hidden');
+          document.getElementById('overlay').classList.remove('hidden');
         };
 
         if (task.priority === 'ASAP') {
@@ -182,12 +212,12 @@
       }
 
       displayTasks();
-      document.getElementById('taskFormContainer').classList.add('hidden');
+      document.getElementById('overlay').classList.add('hidden');
       selectedTaskId = null;
     }
 
     document.getElementById('createTaskBtn').onclick = () => {
-      document.getElementById('taskFormContainer').classList.remove('hidden');
+      document.getElementById('overlay').classList.remove('hidden');
       selectedTaskId = null;
       document.getElementById('taskTitle').value = '';
       document.getElementById('taskDueDate').value = '';
@@ -195,6 +225,14 @@
       document.getElementById('taskPriority').value = 'Medium';
       document.getElementById('taskStatus').value = 'to-do';
     };
+
+    // Show today's date in required format
+    document.getElementById('todayDate').textContent = "Today: " + new Date().toLocaleDateString("en-US", {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
     fetchTasks();
   </script>
