@@ -11,30 +11,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* Custom Flatpickr Dark Theme */
-    .flatpickr-calendar {
-      background: #1f2937;
-      color: #e5e7eb;
-    }
-    .flatpickr-day {
-      color: #e5e7eb;
-    }
-    .flatpickr-day:hover {
-      background: #374151;
-    }
-    .flatpickr-day.selected {
-      background: #3b82f6;
-      border-color: #3b82f6;
-    }
-    .flatpickr-month, .flatpickr-current-month {
-      color: #e5e7eb;
-    }
-    .flatpickr-prev-month, .flatpickr-next-month {
-      color: #9ca3af;
-    }
-    .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
-      color: #e5e7eb;
-    }
+    .flatpickr-calendar { background: #1f2937; color: #e5e7eb; }
+    .flatpickr-day { color: #e5e7eb; }
+    .flatpickr-day:hover { background: #374151; }
+    .flatpickr-day.selected { background: #3b82f6; border-color: #3b82f6; }
+    .flatpickr-month, .flatpickr-current-month { color: #e5e7eb; }
+    .flatpickr-prev-month, .flatpickr-next-month { color: #9ca3af; }
+    .flatpickr-prev-month:hover, .flatpickr-next-month:hover { color: #e5e7eb; }
     .flatpickr-input {
       background: #1f2937 !important;
       color: #e5e7eb !important;
@@ -52,21 +35,11 @@
 
   <!-- 5 Vertical Columns -->
   <div class="column-container flex overflow-x-auto gap-4">
-    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Past</h3>
-    </div>
-    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Last Week</h3>
-    </div>
-    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">This Week</h3>
-    </div>
-    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Next Week</h3>
-    </div>
-    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Future</h3>
-    </div>
+    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
   </div>
 
   <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Create Task</button>
@@ -88,9 +61,7 @@
     <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
   </div>
 
-  <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
   <script>
     const tasks = [];
     let selectedTaskId = null;
@@ -108,21 +79,44 @@
     }
 
     function displayTasks() {
-      ["past", "lastWeek", "thisWeek", "nextWeek", "future"].forEach(id => {
-        const column = document.getElementById(id);
-        column.innerHTML = `<h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">${column.querySelector('h3')?.textContent || ''}</h3>`;
-      });
-      document.getElementById("priorityBar").innerHTML = `<h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>`;
-
       const today = new Date();
+
       const getWeekStart = (date, offset) => {
         const d = new Date(date);
-        d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7));
+        d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7)); // Monday start
+        d.setHours(0, 0, 0, 0);
         return d;
       };
+
+      const formatDate = (date) => {
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      };
+
+      const formatDateRange = (startDate) => {
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
+        return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+      };
+
       const thisWeekStart = getWeekStart(today, 0);
       const nextWeekStart = getWeekStart(today, 1);
       const lastWeekStart = getWeekStart(today, -1);
+      const weekAfterNextStart = getWeekStart(today, 2);
+
+      const headings = {
+        past: "Past",
+        lastWeek: `Last Week<br><span class="text-sm text-gray-400">${formatDateRange(lastWeekStart)}</span>`,
+        thisWeek: `This Week<br><span class="text-sm text-gray-400">${formatDateRange(thisWeekStart)}</span>`,
+        nextWeek: `Next Week<br><span class="text-sm text-gray-400">${formatDateRange(nextWeekStart)}</span>`,
+        future: "Future"
+      };
+
+      ["past", "lastWeek", "thisWeek", "nextWeek", "future"].forEach(id => {
+        const column = document.getElementById(id);
+        column.innerHTML = `<h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">${headings[id]}</h3>`;
+      });
+
+      document.getElementById("priorityBar").innerHTML = `<h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>`;
 
       tasks.forEach((task) => {
         const taskDate = new Date(task.dueDate);
@@ -148,7 +142,7 @@
           document.getElementById('lastWeek').appendChild(taskBox);
         } else if (taskDate >= thisWeekStart && taskDate < nextWeekStart) {
           document.getElementById('thisWeek').appendChild(taskBox);
-        } else if (taskDate >= nextWeekStart && taskDate < getWeekStart(today, 2)) {
+        } else if (taskDate >= nextWeekStart && taskDate < weekAfterNextStart) {
           document.getElementById('nextWeek').appendChild(taskBox);
         } else {
           document.getElementById('future').appendChild(taskBox);
@@ -183,7 +177,7 @@
         });
         if (res.ok) {
           const newTask = await res.json();
-          tasks.push({ ...task, id: newTask.id || null }); // in case backend returns ID
+          tasks.push({ ...task, id: newTask.id || null });
         }
       }
 
