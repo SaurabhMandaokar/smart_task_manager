@@ -65,5 +65,13 @@ def update_task(page_id):
     )
     return jsonify({"status": "updated"})
 
+@app.route("/tasks/<string:page_id>", methods=["DELETE"])
+def delete_task(page_id):
+    notion.pages.update(
+        page_id=page_id,
+        archived=True
+    )
+    return jsonify({"status": "deleted"})
+
 if __name__ == "__main__":
     app.run(debug=True, port=5050)
