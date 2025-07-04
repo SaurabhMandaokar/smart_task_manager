@@ -93,7 +93,7 @@
 
   <script>
     const tasks = [];
-    let selectedTaskIndex = null;
+    let selectedTaskId = null;
 
     flatpickr("#taskDueDate", {
       dateFormat: "Y-m-d",
@@ -124,14 +124,14 @@
       const nextWeekStart = getWeekStart(today, 1);
       const lastWeekStart = getWeekStart(today, -1);
 
-      tasks.forEach((task, i) => {
+      tasks.forEach((task) => {
         const taskDate = new Date(task.dueDate);
         const taskBox = document.createElement('div');
         taskBox.className = 'task bg-gray-700 p-4 mb-4 rounded-lg shadow hover:bg-gray-600 transition-colors cursor-pointer';
         taskBox.innerHTML = `<strong class="text-gray-100">${task.title}</strong><br/><small class="text-gray-400">${task.dueDate} – ${task.priority} – ${task.status}</small>`;
 
         taskBox.onclick = () => {
-          selectedTaskIndex = i;
+          selectedTaskId = task.id;
           document.getElementById('taskTitle').value = task.title;
           document.getElementById('taskDueDate').value = task.dueDate;
           document.getElementById('taskDesc').value = task.description;
@@ -165,14 +165,15 @@
         status: document.getElementById('taskStatus').value
       };
 
-      if (selectedTaskIndex !== null) {
-        const res = await fetch(`/tasks/${selectedTaskIndex}`, {
+      if (selectedTaskId !== null) {
+        const res = await fetch(`/tasks/${selectedTaskId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(task)
         });
         if (res.ok) {
-          tasks[selectedTaskIndex] = task;
+          const index = tasks.findIndex(t => t.id === selectedTaskId);
+          if (index !== -1) tasks[index] = { ...task, id: selectedTaskId };
         }
       } else {
         const res = await fetch('/tasks', {
@@ -181,18 +182,19 @@
           body: JSON.stringify(task)
         });
         if (res.ok) {
-          tasks.push(task);
+          const newTask = await res.json();
+          tasks.push({ ...task, id: newTask.id || null }); // in case backend returns ID
         }
       }
 
       displayTasks();
       document.getElementById('taskFormContainer').classList.add('hidden');
-      selectedTaskIndex = null;
+      selectedTaskId = null;
     }
 
     document.getElementById('createTaskBtn').onclick = () => {
       document.getElementById('taskFormContainer').classList.remove('hidden');
-      selectedTaskIndex = null;
+      selectedTaskId = null;
       document.getElementById('taskTitle').value = '';
       document.getElementById('taskDueDate').value = '';
       document.getElementById('taskDesc').value = '';
