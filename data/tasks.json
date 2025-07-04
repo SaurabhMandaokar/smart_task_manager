@@ -10,14 +10,14 @@
     "title": "Team retrospective meeting",
     "dueDate": "2025-07-01",
     "description": "Discuss last sprint outcomes",
-    "priority": "medium",
+    "priority": "ASAP",
     "status": "in-progress"
   },
   {
     "title": "Update project roadmap",
     "dueDate": "2025-07-05",
     "description": "Incorporate feedback from product team",
-    "priority": "medium",
+    "priority": "ASAP",
     "status": "to-do"
   },
   {

@@ -7,128 +7,85 @@
   <!-- Flatpickr Date Picker CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    body {
-      background: #1e1e1e;
-      color: white;
-      font-family: sans-serif;
-      margin: 0;
-      padding: 20px;
+    /* Custom Flatpickr Dark Theme */
+    .flatpickr-calendar {
+      background: #1f2937;
+      color: #e5e7eb;
     }
-
-    h1 {
-      margin-bottom: 20px;
+    .flatpickr-day {
+      color: #e5e7eb;
     }
-
-    .priority-bar {
-      display: flex;
-      overflow-x: auto;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding: 10px;
-      background: #3a1e1e;
-      border-radius: 5px;
+    .flatpickr-day:hover {
+      background: #374151;
     }
-
-    .priority-bar h3 {
-      min-width: 120px;
-      margin-right: 10px;
-      color: #ff6666;
+    .flatpickr-day.selected {
+      background: #3b82f6;
+      border-color: #3b82f6;
     }
-
-    .column-container {
-      display: flex;
-      overflow-x: auto;
-      gap: 10px;
+    .flatpickr-month, .flatpickr-current-month {
+      color: #e5e7eb;
     }
-
-    .column {
-      min-width: 220px;
-      flex-shrink: 0;
-      background: #2a2a2a;
-      padding: 10px;
-      border-radius: 5px;
+    .flatpickr-prev-month, .flatpickr-next-month {
+      color: #9ca3af;
     }
-
-    .column h3 {
-      text-align: center;
-      border-bottom: 1px solid #444;
-      padding-bottom: 5px;
-      margin-top: 0;
+    .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
+      color: #e5e7eb;
     }
-
-    .task {
-      background: #333;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #taskFormContainer {
-      margin-top: 20px;
-    }
-
-    input, select {
-      display: block;
-      margin: 5px 0;
-      padding: 5px;
-      width: 100%;
-      background: #111;
-      color: white;
-      border: 1px solid #444;
-      border-radius: 3px;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: #444;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #666;
+    .flatpickr-input {
+      background: #1f2937 !important;
+      color: #e5e7eb !important;
+      border: 1px solid #374151 !important;
     }
   </style>
 </head>
-<body>
-  <h1>🧠 TASKS</h1>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6">
+  <h1 class="text-3xl font-bold mb-8 text-center">🧠 TASKS</h1>
 
   <!-- Priority Tasks Horizontal Bar -->
-  <div class="priority-bar" id="priorityBar">
-    <h3>🔥 Priority</h3>
+  <div class="priority-bar flex overflow-x-auto gap-4 mb-8 p-4 bg-gray-800 rounded-lg shadow-lg" id="priorityBar">
+    <h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>
   </div>
 
   <!-- 5 Vertical Columns -->
-  <div class="column-container">
-    <div id="past" class="column"><h3>Past</h3></div>
-    <div id="lastWeek" class="column"><h3>Last Week</h3></div>
-    <div id="thisWeek" class="column"><h3>This Week</h3></div>
-    <div id="nextWeek" class="column"><h3>Next Week</h3></div>
-    <div id="future" class="column"><h3>Future</h3></div>
+  <div class="column-container flex overflow-x-auto gap-4">
+    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Past</h3>
+    </div>
+    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Last Week</h3>
+    </div>
+    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">This Week</h3>
+    </div>
+    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Next Week</h3>
+    </div>
+    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Future</h3>
+    </div>
   </div>
 
-  <button id="createTaskBtn">Create Task</button>
+  <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Create Task</button>
 
-  <div id="taskFormContainer" style="display:none;">
-    <input id="taskTitle" placeholder="Title" />
-    <input id="taskDueDate" placeholder="Due Date" />
-    <input id="taskDesc" placeholder="Description" />
-    <select id="taskPriority">
+  <div id="taskFormContainer" class="mt-6 p-6 bg-gray-800 rounded-lg shadow-lg hidden max-w-md mx-auto">
+    <input id="taskTitle" placeholder="Title" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    <input id="taskDesc" placeholder="Description" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    <select id="taskPriority" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
       <option value="Low">Low</option>
       <option value="Medium">Medium</option>
       <option value="ASAP">ASAP</option>
     </select>
-    <select id="taskStatus">
+    <select id="taskStatus" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
       <option value="to-do">To Do</option>
       <option value="in-progress">In Progress</option>
       <option value="done">Done</option>
     </select>
-    <button onclick="saveTask()">Save Task</button>
+    <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
   </div>
 
   <!-- Flatpickr JS -->
@@ -139,7 +96,8 @@
     let selectedTaskIndex = null;
 
     flatpickr("#taskDueDate", {
-      dateFormat: "Y-m-d"
+      dateFormat: "Y-m-d",
+      theme: "dark"
     });
 
     async function fetchTasks() {
@@ -152,9 +110,9 @@
     function displayTasks() {
       ["past", "lastWeek", "thisWeek", "nextWeek", "future"].forEach(id => {
         const column = document.getElementById(id);
-        column.innerHTML = `<h3>${column.querySelector('h3')?.textContent || ''}</h3>`;
+        column.innerHTML = `<h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">${column.querySelector('h3')?.textContent || ''}</h3>`;
       });
-      document.getElementById("priorityBar").innerHTML = `<h3>🔥 Priority</h3>`;
+      document.getElementById("priorityBar").innerHTML = `<h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>`;
 
       const today = new Date();
       const getWeekStart = (date, offset) => {
@@ -169,8 +127,8 @@
       tasks.forEach((task, i) => {
         const taskDate = new Date(task.dueDate);
         const taskBox = document.createElement('div');
-        taskBox.className = 'task';
-        taskBox.innerHTML = `<strong>${task.title}</strong><br/><small>${task.dueDate} – ${task.priority} – ${task.status}</small>`;
+        taskBox.className = 'task bg-gray-700 p-4 mb-4 rounded-lg shadow hover:bg-gray-600 transition-colors cursor-pointer';
+        taskBox.innerHTML = `<strong class="text-gray-100">${task.title}</strong><br/><small class="text-gray-400">${task.dueDate} – ${task.priority} – ${task.status}</small>`;
 
         taskBox.onclick = () => {
           selectedTaskIndex = i;
@@ -179,7 +137,7 @@
           document.getElementById('taskDesc').value = task.description;
           document.getElementById('taskPriority').value = task.priority;
           document.getElementById('taskStatus').value = task.status;
-          document.getElementById('taskFormContainer').style.display = 'block';
+          document.getElementById('taskFormContainer').classList.remove('hidden');
         };
 
         if (task.priority === 'ASAP') {
@@ -228,12 +186,12 @@
       }
 
       displayTasks();
-      document.getElementById('taskFormContainer').style.display = 'none';
+      document.getElementById('taskFormContainer').classList.add('hidden');
       selectedTaskIndex = null;
     }
 
     document.getElementById('createTaskBtn').onclick = () => {
-      document.getElementById('taskFormContainer').style.display = 'block';
+      document.getElementById('taskFormContainer').classList.remove('hidden');
       selectedTaskIndex = null;
       document.getElementById('taskTitle').value = '';
       document.getElementById('taskDueDate').value = '';
