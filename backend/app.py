@@ -45,7 +45,7 @@ def add_task():
             "Due Date": {"date": {"start": task["dueDate"]}},
             "Description": {"rich_text": [{"text": {"content": task["description"]}}]},
             "Priority": {"select": {"name": task["priority"]}},
-            "Status": {"select": {"name": task["status"]}}
+            "Status": {"select": {"name": "to-do"}}
         }
     )
     return jsonify({"status": "success"})
@@ -60,10 +60,18 @@ def update_task(page_id):
             "Due Date": {"date": {"start": task["dueDate"]}},
             "Description": {"rich_text": [{"text": {"content": task["description"]}}]},
             "Priority": {"select": {"name": task["priority"]}},
-            "Status": {"select": {"name": task["status"]}}
+            "Status": {"select": {"name": "to-do"}}
         }
     )
     return jsonify({"status": "updated"})
 
+@app.route("/tasks/<string:page_id>", methods=["DELETE"])
+def delete_task(page_id):
+    notion.pages.update(
+        page_id=page_id,
+        archived=True
+    )
+    return jsonify({"status": "deleted"})
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5050)

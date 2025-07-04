@@ -11,38 +11,28 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* Custom Flatpickr Dark Theme */
-    .flatpickr-calendar {
-      background: #1f2937;
-      color: #e5e7eb;
-    }
-    .flatpickr-day {
-      color: #e5e7eb;
-    }
-    .flatpickr-day:hover {
-      background: #374151;
-    }
-    .flatpickr-day.selected {
-      background: #3b82f6;
-      border-color: #3b82f6;
-    }
-    .flatpickr-month, .flatpickr-current-month {
-      color: #e5e7eb;
-    }
-    .flatpickr-prev-month, .flatpickr-next-month {
-      color: #9ca3af;
-    }
-    .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
-      color: #e5e7eb;
-    }
+    .flatpickr-calendar { background: #1f2937; color: #e5e7eb; }
+    .flatpickr-day { color: #e5e7eb; }
+    .flatpickr-day:hover { background: #374151; }
+    .flatpickr-day.selected { background: #3b82f6; border-color: #3b82f6; }
+    .flatpickr-month, .flatpickr-current-month { color: #e5e7eb; }
+    .flatpickr-prev-month, .flatpickr-next-month { color: #9ca3af; }
+    .flatpickr-prev-month:hover, .flatpickr-next-month:hover { color: #e5e7eb; }
     .flatpickr-input {
       background: #1f2937 !important;
       color: #e5e7eb !important;
       border: 1px solid #374151 !important;
     }
+    #overlay {
+      transition: all 0.3s ease;
+    }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6">
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6 relative">
+
+  <!-- Today's Date -->
+  <div class="absolute top-6 left-6 text-sm text-gray-400" id="todayDate"></div>
+
   <h1 class="text-3xl font-bold mb-8 text-center">🧠 TASKS</h1>
 
   <!-- Priority Tasks Horizontal Bar -->
@@ -52,45 +42,60 @@
 
   <!-- 5 Vertical Columns -->
   <div class="column-container flex overflow-x-auto gap-4">
-    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Past</h3>
-    </div>
-    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Last Week</h3>
-    </div>
-    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">This Week</h3>
-    </div>
-    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Next Week</h3>
-    </div>
-    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg">
-      <h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">Future</h3>
-    </div>
+    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
   </div>
 
   <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Create Task</button>
 
-  <div id="taskFormContainer" class="mt-6 p-6 bg-gray-800 rounded-lg shadow-lg hidden max-w-md mx-auto">
-    <input id="taskTitle" placeholder="Title" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <input id="taskDesc" placeholder="Description" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <select id="taskPriority" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <option value="Low">Low</option>
-      <option value="Medium">Medium</option>
-      <option value="ASAP">ASAP</option>
-    </select>
-    <select id="taskStatus" class="w-full p-3 mb-4 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <option value="to-do">To Do</option>
-      <option value="in-progress">In Progress</option>
-      <option value="done">Done</option>
-    </select>
-    <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
+  <!-- Modal Overlay for Task Form -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+    <div id="taskFormContainer" class="p-6 bg-gray-800 rounded-lg shadow-lg w-full max-w-md space-y-4 relative">
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Title</label>
+        <input id="taskTitle" placeholder="Title" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Due Date</label>
+        <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Description</label>
+        <textarea id="taskDesc" placeholder="Description" rows="4" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400 mb-1 block">Priority</label>
+        <select id="taskPriority" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="ASAP">ASAP</option>
+        </select>
+      </div>
+
+      <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
+      <button onclick="markComplete()" class="w-full p-3 bg-green-600 text-white rounded-lg hover:bg-green-500 transition-colors">✔ Mark Complete</button>
+      <button onclick="cancelEdit()" class="w-full p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors">Cancel</button>
+
+      <div id="loadingIndicator" class="absolute top-4 right-4 text-sm text-gray-300 hidden">
+        Saving...
+      </div>
+      <div id="confirmDeleteBox" class="hidden mt-4 bg-gray-700 p-4 rounded-lg shadow text-center">
+        <p class="text-white mb-4">Are you sure you want to mark this task complete?<br />It will be <span class="text-red-500">deleted</span>.</p>
+        <div class="flex justify-center gap-4">
+          <button onclick="confirmDelete(true)" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded">✔ Confirm</button>
+          <button onclick="confirmDelete(false)" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
   <script>
     const tasks = [];
     let selectedTaskId = null;
@@ -108,27 +113,53 @@
     }
 
     function displayTasks() {
-      ["past", "lastWeek", "thisWeek", "nextWeek", "future"].forEach(id => {
-        const column = document.getElementById(id);
-        column.innerHTML = `<h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">${column.querySelector('h3')?.textContent || ''}</h3>`;
-      });
-      document.getElementById("priorityBar").innerHTML = `<h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>`;
-
       const today = new Date();
+
       const getWeekStart = (date, offset) => {
         const d = new Date(date);
-        d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7));
+        d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7)); // Monday start
+        d.setHours(0, 0, 0, 0);
         return d;
       };
+
+      const formatDate = (date) => {
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      };
+
+      const formatDateRange = (startDate) => {
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
+        return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+      };
+
       const thisWeekStart = getWeekStart(today, 0);
       const nextWeekStart = getWeekStart(today, 1);
       const lastWeekStart = getWeekStart(today, -1);
+      const weekAfterNextStart = getWeekStart(today, 2);
+
+      const headings = {
+        past: "Past",
+        lastWeek: `Last Week<br><span class="text-sm text-gray-400">${formatDateRange(lastWeekStart)}</span>`,
+        thisWeek: `This Week<br><span class="text-sm text-gray-400">${formatDateRange(thisWeekStart)}</span>`,
+        nextWeek: `Next Week<br><span class="text-sm text-gray-400">${formatDateRange(nextWeekStart)}</span>`,
+        future: "Future"
+      };
+
+      // Clear and restore headings for all columns (priorityBar and vertical columns)
+      ["priorityBar", "past", "lastWeek", "thisWeek", "nextWeek", "future"].forEach(id => {
+        const container = document.getElementById(id);
+        if (id === "priorityBar") {
+          container.innerHTML = `<h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>`;
+        } else {
+          container.innerHTML = `<h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">${headings[id]}</h3>`;
+        }
+      });
 
       tasks.forEach((task) => {
         const taskDate = new Date(task.dueDate);
         const taskBox = document.createElement('div');
         taskBox.className = 'task bg-gray-700 p-4 mb-4 rounded-lg shadow hover:bg-gray-600 transition-colors cursor-pointer';
-        taskBox.innerHTML = `<strong class="text-gray-100">${task.title}</strong><br/><small class="text-gray-400">${task.dueDate} – ${task.priority} – ${task.status}</small>`;
+        taskBox.innerHTML = `<strong class="text-gray-100">${task.title}</strong><br/><small class="text-gray-400">${task.dueDate} – ${task.priority}</small>`;
 
         taskBox.onclick = () => {
           selectedTaskId = task.id;
@@ -136,33 +167,39 @@
           document.getElementById('taskDueDate').value = task.dueDate;
           document.getElementById('taskDesc').value = task.description;
           document.getElementById('taskPriority').value = task.priority;
-          document.getElementById('taskStatus').value = task.status;
-          document.getElementById('taskFormContainer').classList.remove('hidden');
+          document.getElementById('overlay').classList.remove('hidden');
         };
 
+        let placed = false;
         if (task.priority === 'ASAP') {
           document.getElementById('priorityBar').appendChild(taskBox);
-        } else if (taskDate < lastWeekStart) {
-          document.getElementById('past').appendChild(taskBox);
-        } else if (taskDate >= lastWeekStart && taskDate < thisWeekStart) {
-          document.getElementById('lastWeek').appendChild(taskBox);
-        } else if (taskDate >= thisWeekStart && taskDate < nextWeekStart) {
-          document.getElementById('thisWeek').appendChild(taskBox);
-        } else if (taskDate >= nextWeekStart && taskDate < getWeekStart(today, 2)) {
-          document.getElementById('nextWeek').appendChild(taskBox);
-        } else {
-          document.getElementById('future').appendChild(taskBox);
+          placed = true;
+        }
+
+        if (!placed) {
+          if (taskDate < lastWeekStart) {
+            document.getElementById('past').appendChild(taskBox);
+          } else if (taskDate >= lastWeekStart && taskDate < thisWeekStart) {
+            document.getElementById('lastWeek').appendChild(taskBox);
+          } else if (taskDate >= thisWeekStart && taskDate < nextWeekStart) {
+            document.getElementById('thisWeek').appendChild(taskBox);
+          } else if (taskDate >= nextWeekStart && taskDate < weekAfterNextStart) {
+            document.getElementById('nextWeek').appendChild(taskBox);
+          } else {
+            document.getElementById('future').appendChild(taskBox);
+          }
         }
       });
     }
 
     async function saveTask() {
+      document.getElementById('loadingIndicator').classList.remove('hidden');
+
       const task = {
         title: document.getElementById('taskTitle').value,
         dueDate: document.getElementById('taskDueDate').value,
         description: document.getElementById('taskDesc').value,
-        priority: document.getElementById('taskPriority').value,
-        status: document.getElementById('taskStatus').value
+        priority: document.getElementById('taskPriority').value
       };
 
       if (selectedTaskId !== null) {
@@ -183,24 +220,59 @@
         });
         if (res.ok) {
           const newTask = await res.json();
-          tasks.push({ ...task, id: newTask.id || null }); // in case backend returns ID
+          tasks.push({ ...task, id: newTask.id || null });
         }
       }
 
       displayTasks();
-      document.getElementById('taskFormContainer').classList.add('hidden');
+      document.getElementById('overlay').classList.add('hidden');
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      selectedTaskId = null;
+    }
+
+    function markComplete() {
+      if (selectedTaskId !== null) {
+        document.getElementById('confirmDeleteBox').classList.remove('hidden');
+      }
+    }
+
+    async function confirmDelete(shouldDelete) {
+      document.getElementById('confirmDeleteBox').classList.add('hidden');
+      if (!shouldDelete || selectedTaskId === null) return;
+
+      document.getElementById('loadingIndicator').classList.remove('hidden');
+      const res = await fetch(`/tasks/${selectedTaskId}`, { method: 'DELETE' });
+      if (res.ok) {
+        const index = tasks.findIndex(t => t.id === selectedTaskId);
+        if (index !== -1) tasks.splice(index, 1);
+        displayTasks();
+        document.getElementById('overlay').classList.add('hidden');
+      }
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      selectedTaskId = null;
+    }
+
+    function cancelEdit() {
+      document.getElementById('overlay').classList.add('hidden');
       selectedTaskId = null;
     }
 
     document.getElementById('createTaskBtn').onclick = () => {
-      document.getElementById('taskFormContainer').classList.remove('hidden');
+      document.getElementById('overlay').classList.remove('hidden');
       selectedTaskId = null;
       document.getElementById('taskTitle').value = '';
       document.getElementById('taskDueDate').value = '';
       document.getElementById('taskDesc').value = '';
       document.getElementById('taskPriority').value = 'Medium';
-      document.getElementById('taskStatus').value = 'to-do';
     };
+
+    // Show today's date in required format
+    document.getElementById('todayDate').textContent = "Today: " + new Date().toLocaleDateString("en-US", {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
     fetchTasks();
   </script>
