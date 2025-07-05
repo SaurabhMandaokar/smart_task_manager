@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <title>Task Board</title>
 
+  <!-- Playfair Display Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
   <!-- Flatpickr Date Picker CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
@@ -11,24 +14,58 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    .flatpickr-calendar { background: #1f2937; color: #e5e7eb; }
-    .flatpickr-day { color: #e5e7eb; }
-    .flatpickr-day:hover { background: #374151; }
-    .flatpickr-day.selected { background: #3b82f6; border-color: #3b82f6; }
-    .flatpickr-month, .flatpickr-current-month { color: #e5e7eb; }
+    body {
+      background: #0f1e13; /* deep forest green */
+      color: #e5e7eb;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .flatpickr-calendar {
+      background: #1b2b20;
+      color: #c2dac2;
+    }
+    .flatpickr-day { color: #c2dac2; }
+    .flatpickr-day:hover {
+      background: #2d4432;
+    }
+    .flatpickr-day.selected {
+      background: #6b8f71;
+      border-color: #6b8f71;
+    }
+    .flatpickr-month, .flatpickr-current-month { color: #c2dac2; }
     .flatpickr-prev-month, .flatpickr-next-month { color: #9ca3af; }
-    .flatpickr-prev-month:hover, .flatpickr-next-month:hover { color: #e5e7eb; }
+    .flatpickr-prev-month:hover, .flatpickr-next-month:hover { color: #c2dac2; }
     .flatpickr-input {
-      background: #1f2937 !important;
-      color: #e5e7eb !important;
-      border: 1px solid #374151 !important;
+      background: #1f2d23 !important;
+      color: #c2dac2 !important;
+      border: 1px solid #37503c !important;
     }
     #overlay {
       transition: all 0.3s ease;
     }
+
+    .column, .priority-bar {
+      background-color: #1a2a1e;
+      border: 1px solid #3e5546;
+    }
+
+    .task {
+      background-color: #233528;
+      border: 1px solid #506d5c;
+    }
+
+    #taskFormContainer {
+      background-color: #1a2a1e;
+      border: 1px solid #3e5546;
+    }
+
+    #confirmDeleteBox {
+      background-color: #2a3f30;
+      border: 1px solid #5b7d66;
+    }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6 relative">
+<body class="bg-[#0f1e13] text-gray-100 font-sans min-h-screen p-6 relative">
 
   <!-- Today's Date -->
   <div class="absolute top-6 left-6 text-sm text-gray-400" id="todayDate"></div>
@@ -36,56 +73,56 @@
   <h1 class="text-3xl font-bold mb-8 text-center">🧠 TASKS</h1>
 
   <!-- Priority Tasks Horizontal Bar -->
-  <div class="priority-bar flex overflow-x-auto gap-4 mb-8 p-4 bg-gray-800 rounded-lg shadow-lg" id="priorityBar">
+  <div class="priority-bar flex overflow-x-auto gap-4 mb-8 p-4 bg-[#1a2a1e] rounded-lg shadow-lg" id="priorityBar">
     <h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>
   </div>
 
   <!-- 5 Vertical Columns -->
   <div class="column-container flex overflow-x-auto gap-4">
-    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-[#1a2a1e] p-4 rounded-lg shadow-lg"></div>
+    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-[#1a2a1e] p-4 rounded-lg shadow-lg"></div>
+    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-[#1a2a1e] p-4 rounded-lg shadow-lg"></div>
+    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-[#1a2a1e] p-4 rounded-lg shadow-lg"></div>
+    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-[#1a2a1e] p-4 rounded-lg shadow-lg"></div>
   </div>
 
-  <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Create Task</button>
+  <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-600 transition-colors">Create Task</button>
 
   <!-- Modal Overlay for Task Form -->
   <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
-    <div id="taskFormContainer" class="p-6 bg-gray-800 rounded-lg shadow-lg w-full max-w-md space-y-4 relative">
+    <div id="taskFormContainer" class="p-6 bg-[#1a2a1e] rounded-lg shadow-lg w-full max-w-md space-y-4 relative">
       <div>
         <label class="text-sm text-gray-400 mb-1 block">Title</label>
-        <input id="taskTitle" placeholder="Title" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input id="taskTitle" placeholder="Title" class="w-full p-3 bg-[#233528] text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600" />
       </div>
 
       <div>
         <label class="text-sm text-gray-400 mb-1 block">Due Date</label>
-        <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 bg-[#233528] text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600" />
       </div>
 
       <div>
         <label class="text-sm text-gray-400 mb-1 block">Description</label>
-        <textarea id="taskDesc" placeholder="Description" rows="4" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        <textarea id="taskDesc" placeholder="Description" rows="4" class="w-full p-3 bg-[#233528] text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-none"></textarea>
       </div>
 
       <div>
         <label class="text-sm text-gray-400 mb-1 block">Priority</label>
-        <select id="taskPriority" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="taskPriority" class="w-full p-3 bg-[#233528] text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600">
           <option value="Low">Low</option>
           <option value="Medium">Medium</option>
           <option value="ASAP">ASAP</option>
         </select>
       </div>
 
-      <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
+      <button onclick="saveTask()" class="w-full p-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-600 transition-colors">Save Task</button>
       <button onclick="markComplete()" class="w-full p-3 bg-green-600 text-white rounded-lg hover:bg-green-500 transition-colors">✔ Mark Complete</button>
       <button onclick="cancelEdit()" class="w-full p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors">Cancel</button>
 
       <div id="loadingIndicator" class="absolute top-4 right-4 text-sm text-gray-300 hidden">
         Saving...
       </div>
-      <div id="confirmDeleteBox" class="hidden mt-4 bg-gray-700 p-4 rounded-lg shadow text-center">
+      <div id="confirmDeleteBox" class="hidden mt-4 bg-[#2a3f30] p-4 rounded-lg shadow text-center border border-[#5b7d66]">
         <p class="text-white mb-4">Are you sure you want to mark this task complete?<br />It will be <span class="text-red-500">deleted</span>.</p>
         <div class="flex justify-center gap-4">
           <button onclick="confirmDelete(true)" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded">✔ Confirm</button>
@@ -158,7 +195,7 @@
       tasks.forEach((task) => {
         const taskDate = new Date(task.dueDate);
         const taskBox = document.createElement('div');
-        taskBox.className = 'task bg-gray-700 p-4 mb-4 rounded-lg shadow hover:bg-gray-600 transition-colors cursor-pointer';
+        taskBox.className = 'task bg-[#233528] p-4 mb-4 rounded-lg shadow hover:bg-gray-600 transition-colors cursor-pointer';
         taskBox.innerHTML = `<strong class="text-gray-100">${task.title}</strong><br/><small class="text-gray-400">${task.dueDate} – ${task.priority}</small>`;
 
         taskBox.onclick = () => {
