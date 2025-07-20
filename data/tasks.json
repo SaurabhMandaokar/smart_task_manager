@@ -8,7 +8,7 @@
   },
   {
     "title": "Team retrospective meeting",
-    "dueDate": "2025-07-01",
+    "dueDate": "2025-07-04",
     "description": "Discuss last sprint outcomes",
     "priority": "ASAP",
     "status": "in-progress"
@@ -29,9 +29,9 @@
   },
   {
     "title": "Renew domain name",
-    "dueDate": "2025-07-25",
+    "dueDate": "2025-07-02",
     "description": "Check registrar and payment",
-    "priority": "medium",
+    "priority": "ASAP",
     "status": "done"
   },
   {
