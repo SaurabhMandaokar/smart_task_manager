@@ -2,277 +2,571 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Task Board</title>
+  <title>TASK // BOARD</title>
 
-  <!-- Flatpickr Date Picker CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // Deep forest green panel, parchment text — keeping the "olive" key
+            // so existing utility classes don't have to change.
+            olive: {
+              950: '#070d0a',
+              900: '#0b1410',
+              800: '#101d17',
+              700: '#1a2e25',
+              600: '#2a4136',
+              500: '#3d5849',
+              400: '#6b7d70',
+              300: '#9aa89c',
+              200: '#d8d2b8',
+              100: '#ece6d0',
+            },
+            accent: {
+              DEFAULT: '#ece6d0',  // parchment cream
+              dark:    '#c4b88f',
+              dim:     '#7a704f',
+            },
+            rust: '#c97a5a',
+            warm: '#d4b07a',
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            serif: ['Instrument Serif', 'Georgia', 'serif'],
+          },
+        }
+      }
+    };
+  </script>
 
   <style>
-    .flatpickr-calendar { background: #1f2937; color: #e5e7eb; }
-    .flatpickr-day { color: #e5e7eb; }
-    .flatpickr-day:hover { background: #374151; }
-    .flatpickr-day.selected { background: #3b82f6; border-color: #3b82f6; }
-    .flatpickr-month, .flatpickr-current-month { color: #e5e7eb; }
-    .flatpickr-prev-month, .flatpickr-next-month { color: #9ca3af; }
-    .flatpickr-prev-month:hover, .flatpickr-next-month:hover { color: #e5e7eb; }
-    .flatpickr-input {
-      background: #1f2937 !important;
-      color: #e5e7eb !important;
-      border: 1px solid #374151 !important;
+    body {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background-color: #0b1410;
+      background-image:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(236,230,208,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 110%, rgba(42,65,54,0.4) 0%, transparent 60%);
+      background-attachment: fixed;
     }
-    #overlay {
-      transition: all 0.3s ease;
+    /* Paper / marble grain — fine SVG noise */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.92  0 0 0 0 0.90  0 0 0 0 0.81  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      opacity: 0.35;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* Soft top edge highlight */
+    body::after {
+      content: '';
+      position: fixed; left: 0; right: 0; top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(236,230,208,0.25), transparent);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #23291c; border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #363e2a; }
+
+    /* Flatpickr forest/cream theming */
+    .flatpickr-calendar {
+      background: #101d17 !important;
+      border: 1px solid #2a4136 !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7) !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      border-radius: 2px !important;
+    }
+    .flatpickr-day { color: #d8d2b8 !important; border-radius: 2px !important; }
+    .flatpickr-day:hover { background: #1a2e25 !important; border-color: transparent !important; }
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+      background: #ece6d0 !important;
+      border-color: #ece6d0 !important;
+      color: #0b1410 !important;
+    }
+    .flatpickr-day.today { border-color: #6b7d70 !important; }
+    .flatpickr-day.flatpickr-disabled { color: #2a4136 !important; }
+    .flatpickr-month, .flatpickr-current-month, .flatpickr-weekday {
+      color: #d8d2b8 !important;
+    }
+    .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: #6b7d70 !important; }
+    .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg { fill: #ece6d0 !important; }
+
+    .col-header {
+      letter-spacing: 0.18em;
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    .task-card {
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      position: relative;
+    }
+    .task-card::before {
+      content: '';
+      position: absolute;
+      left: -1px; top: -1px; bottom: -1px;
+      width: 2px;
+      background: transparent;
+      transition: background 0.15s ease;
+    }
+    .task-card:hover::before { background: #ece6d0; }
+    .task-card:hover {
+      border-color: #3d5849;
+      background: #142822;
+      transform: translateX(2px);
+    }
+    .task-card.is-asap::before { background: #c97a5a; }
+    .task-card.is-asap:hover::before { background: #d88f70; }
+
+    .input-field {
+      background: #0b1410;
+      border: 1px solid #2a4136;
+      color: #d8d2b8;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .input-field::placeholder { color: #3d5849; }
+    .input-field:focus {
+      outline: none;
+      border-color: #ece6d0;
+      box-shadow: 0 0 0 1px rgba(236,230,208,0.25);
+    }
+
+    /* Buttons match the screenshot: cream outline, cream text, hover fills */
+    .btn-primary {
+      background: transparent;
+      color: #ece6d0;
+      border: 1px solid #ece6d0;
+      transition: all 0.15s;
+      letter-spacing: 0.18em;
+    }
+    .btn-primary:hover {
+      background: #ece6d0;
+      color: #0b1410;
+      box-shadow: 0 0 18px rgba(236,230,208,0.18);
+    }
+    .btn-primary:active { transform: translateY(1px); }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #2a4136;
+      color: #9aa89c;
+      transition: all 0.15s;
+      letter-spacing: 0.18em;
+    }
+    .btn-ghost:hover {
+      border-color: #3d5849;
+      color: #ece6d0;
+      background: #101d17;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(201,122,90,0.55);
+      color: #c97a5a;
+      transition: all 0.15s;
+      letter-spacing: 0.18em;
+    }
+    .btn-danger:hover { background: #c97a5a; color: #0b1410; }
+
+    @keyframes pulse-soft { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
+    .pulse-dot { animation: pulse-soft 2s ease-in-out infinite; }
+
+    @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes scale-in { from { opacity: 0; transform: scale(0.97) } to { opacity: 1; transform: scale(1) } }
+    #overlay:not(.hidden) { animation: fade-in 0.18s ease; }
+    #overlay:not(.hidden) > .modal { animation: scale-in 0.2s ease; }
+
+    .empty-col {
+      color: #2a4136;
+      font-size: 0.65rem;
+      text-align: center;
+      padding: 2rem 0;
+      letter-spacing: 0.25em;
+    }
+
+    .focus-col { box-shadow: inset 0 0 0 1px rgba(236,230,208,0.18); }
+
+    /* Serif display for the page header — matches the parchment feel */
+    .display-serif {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      font-size: 1.6rem;
+      line-height: 1;
     }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6 relative">
+<body class="text-olive-200 min-h-screen">
+  <main class="relative z-10 max-w-[1600px] mx-auto px-6 py-6">
 
-  <!-- Today's Date -->
-  <div class="absolute top-6 left-6 text-sm text-gray-400" id="todayDate"></div>
-
-  <h1 class="text-3xl font-bold mb-8 text-center">🧠 TASKS</h1>
-
-  <!-- Priority Tasks Horizontal Bar -->
-  <div class="priority-bar flex overflow-x-auto gap-4 mb-8 p-4 bg-gray-800 rounded-lg shadow-lg" id="priorityBar">
-    <h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>
-  </div>
-
-  <!-- 5 Vertical Columns -->
-  <div class="column-container flex overflow-x-auto gap-4">
-    <div id="past" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="lastWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="thisWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="nextWeek" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-    <div id="future" class="column min-w-[250px] flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-lg"></div>
-  </div>
-
-  <button id="createTaskBtn" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Create Task</button>
-
-  <!-- Modal Overlay for Task Form -->
-  <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
-    <div id="taskFormContainer" class="p-6 bg-gray-800 rounded-lg shadow-lg w-full max-w-md space-y-4 relative">
-      <div>
-        <label class="text-sm text-gray-400 mb-1 block">Title</label>
-        <input id="taskTitle" placeholder="Title" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-
-      <div>
-        <label class="text-sm text-gray-400 mb-1 block">Due Date</label>
-        <input id="taskDueDate" placeholder="Due Date" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-
-      <div>
-        <label class="text-sm text-gray-400 mb-1 block">Description</label>
-        <textarea id="taskDesc" placeholder="Description" rows="4" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-      </div>
-
-      <div>
-        <label class="text-sm text-gray-400 mb-1 block">Priority</label>
-        <select id="taskPriority" class="w-full p-3 bg-gray-700 text-gray-100 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="ASAP">ASAP</option>
-        </select>
-      </div>
-
-      <button onclick="saveTask()" class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors">Save Task</button>
-      <button onclick="markComplete()" class="w-full p-3 bg-green-600 text-white rounded-lg hover:bg-green-500 transition-colors">✔ Mark Complete</button>
-      <button onclick="cancelEdit()" class="w-full p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors">Cancel</button>
-
-      <div id="loadingIndicator" class="absolute top-4 right-4 text-sm text-gray-300 hidden">
-        Saving...
-      </div>
-      <div id="confirmDeleteBox" class="hidden mt-4 bg-gray-700 p-4 rounded-lg shadow text-center">
-        <p class="text-white mb-4">Are you sure you want to mark this task complete?<br />It will be <span class="text-red-500">deleted</span>.</p>
-        <div class="flex justify-center gap-4">
-          <button onclick="confirmDelete(true)" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded">✔ Confirm</button>
-          <button onclick="confirmDelete(false)" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+    <!-- Top status bar -->
+    <header class="flex items-center justify-between mb-8 pb-4 border-b border-olive-700">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+          <div class="w-1.5 h-1.5 rounded-full bg-accent pulse-dot shadow-[0_0_10px_rgba(236,230,208,0.6)]"></div>
+          <h1 class="display-serif text-olive-100">Task<span class="text-olive-400 italic px-2">//</span>Board</h1>
         </div>
+        <div class="hidden sm:block text-[0.65rem] tracking-[0.2em] text-olive-400" id="todayDate"></div>
+      </div>
+      <div class="flex items-center gap-4 text-[0.65rem] tracking-[0.15em] text-olive-400">
+        <span id="taskCount">— TASKS</span>
+        <span class="text-olive-700">│</span>
+        <button id="refreshBtn" class="hover:text-accent transition-colors">↻ SYNC</button>
+      </div>
+    </header>
+
+    <!-- Priority strip -->
+    <section class="mb-8">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="col-header text-rust">▲ PRIORITY</span>
+        <span class="flex-1 h-px bg-gradient-to-r from-rust/40 via-olive-700 to-transparent"></span>
+        <span class="text-[0.65rem] text-olive-500 tracking-[0.2em]" id="priorityCount">00</span>
+      </div>
+      <div id="priorityBar" class="flex overflow-x-auto gap-3 pb-1 min-h-[4.5rem]"></div>
+    </section>
+
+    <!-- Week columns -->
+    <section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+      <!-- past -->
+      <div class="col-frame bg-olive-900/60 border border-olive-700 rounded-sm">
+        <div class="px-4 py-3 border-b border-olive-700">
+          <div class="col-header text-olive-400">○ PAST</div>
+          <div class="text-[0.6rem] text-olive-600 mt-1 tracking-wider" id="past-range"></div>
+        </div>
+        <div id="past" class="p-3 min-h-[220px] space-y-2"></div>
+      </div>
+      <!-- last week -->
+      <div class="col-frame bg-olive-900/60 border border-olive-700 rounded-sm">
+        <div class="px-4 py-3 border-b border-olive-700">
+          <div class="col-header text-olive-400">◐ LAST WEEK</div>
+          <div class="text-[0.6rem] text-olive-600 mt-1 tracking-wider" id="lastWeek-range"></div>
+        </div>
+        <div id="lastWeek" class="p-3 min-h-[220px] space-y-2"></div>
+      </div>
+      <!-- this week (highlighted) -->
+      <div class="col-frame bg-olive-900/80 border border-accent-dim rounded-sm relative shadow-[0_0_24px_rgba(196,209,102,0.04)]">
+        <div class="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+        <div class="px-4 py-3 border-b border-accent-dim">
+          <div class="col-header text-accent">◉ THIS WEEK</div>
+          <div class="text-[0.6rem] text-olive-400 mt-1 tracking-wider" id="thisWeek-range"></div>
+        </div>
+        <div id="thisWeek" class="p-3 min-h-[220px] space-y-2"></div>
+      </div>
+      <!-- next week -->
+      <div class="col-frame bg-olive-900/60 border border-olive-700 rounded-sm">
+        <div class="px-4 py-3 border-b border-olive-700">
+          <div class="col-header text-olive-400">◑ NEXT WEEK</div>
+          <div class="text-[0.6rem] text-olive-600 mt-1 tracking-wider" id="nextWeek-range"></div>
+        </div>
+        <div id="nextWeek" class="p-3 min-h-[220px] space-y-2"></div>
+      </div>
+      <!-- future -->
+      <div class="col-frame bg-olive-900/60 border border-olive-700 rounded-sm">
+        <div class="px-4 py-3 border-b border-olive-700">
+          <div class="col-header text-olive-400">◯ FUTURE</div>
+          <div class="text-[0.6rem] text-olive-600 mt-1 tracking-wider">→ HORIZON</div>
+        </div>
+        <div id="future" class="p-3 min-h-[220px] space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- Footer action bar -->
+    <div class="flex items-center justify-between text-[0.65rem] text-olive-500 tracking-[0.15em]">
+      <div class="flex items-center gap-3">
+        <span class="text-olive-600">[ ESC ]</span> CLOSE
+        <span class="text-olive-700 mx-1">·</span>
+        <span class="text-olive-600">[ ⌘↵ ]</span> SAVE
+      </div>
+      <button id="createTaskBtn" class="btn-primary px-6 py-2.5 rounded-sm text-xs font-semibold">+ NEW TASK</button>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="overlay" class="hidden fixed inset-0 bg-olive-950/85 backdrop-blur-md flex justify-center items-center z-50 p-6">
+    <div class="modal bg-olive-900 border border-olive-600 rounded-sm w-full max-w-md relative shadow-[0_24px_60px_rgba(0,0,0,0.7)]">
+      <div class="px-5 py-3 border-b border-olive-700 flex items-center justify-between">
+        <span class="col-header text-accent" id="modalTitle">○ NEW TASK</span>
+        <button onclick="cancelEdit()" class="text-olive-500 hover:text-olive-100 text-xl leading-none transition-colors">×</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-[0.6rem] text-olive-400 tracking-[0.2em] mb-1.5">TITLE</label>
+          <input id="taskTitle" placeholder="Untitled task" autocomplete="off"
+            class="input-field w-full px-3 py-2 rounded-sm text-sm" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[0.6rem] text-olive-400 tracking-[0.2em] mb-1.5">DUE DATE</label>
+            <input id="taskDueDate" placeholder="YYYY-MM-DD" autocomplete="off"
+              class="input-field w-full px-3 py-2 rounded-sm text-sm" />
+          </div>
+          <div>
+            <label class="block text-[0.6rem] text-olive-400 tracking-[0.2em] mb-1.5">PRIORITY</label>
+            <select id="taskPriority" class="input-field w-full px-3 py-2 rounded-sm text-sm">
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="ASAP">ASAP</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[0.6rem] text-olive-400 tracking-[0.2em] mb-1.5">DESCRIPTION</label>
+          <textarea id="taskDesc" placeholder="Notes, context, links…" rows="4"
+            class="input-field w-full px-3 py-2 rounded-sm text-sm resize-none"></textarea>
+        </div>
+
+        <div id="confirmDeleteBox" class="hidden bg-olive-950 border border-rust/40 px-4 py-3 rounded-sm">
+          <p class="text-xs text-olive-200 mb-3 leading-relaxed">
+            <span class="text-rust">▲</span> Mark complete? This will <span class="text-rust">archive</span> the task.
+          </p>
+          <div class="flex gap-2">
+            <button onclick="confirmDelete(true)" class="flex-1 btn-danger py-1.5 rounded-sm text-[0.65rem]">CONFIRM</button>
+            <button onclick="confirmDelete(false)" class="flex-1 btn-ghost py-1.5 rounded-sm text-[0.65rem]">CANCEL</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 border-t border-olive-700 flex items-center gap-2">
+        <button id="completeBtn" onclick="markComplete()" class="btn-ghost px-3 py-2 rounded-sm text-[0.65rem] hidden">✓ COMPLETE</button>
+        <span id="loadingIndicator" class="hidden text-[0.65rem] text-olive-400 tracking-[0.15em]">⟳ SYNCING…</span>
+        <div class="flex-1"></div>
+        <button onclick="cancelEdit()" class="btn-ghost px-4 py-2 rounded-sm text-[0.65rem]">CANCEL</button>
+        <button onclick="saveTask()" class="btn-primary px-5 py-2 rounded-sm text-[0.65rem] font-semibold">SAVE</button>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
+    const $ = (id) => document.getElementById(id);
     const tasks = [];
     let selectedTaskId = null;
 
-    flatpickr("#taskDueDate", {
-      dateFormat: "Y-m-d",
-      theme: "dark"
-    });
+    flatpickr('#taskDueDate', { dateFormat: 'Y-m-d' });
+
+    const fmtDate = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fmtRange = (start) => {
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      return `${fmtDate(start)} → ${fmtDate(end)}`;
+    };
+    const weekStart = (date, offset) => {
+      const d = new Date(date);
+      d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
+
+    const PRIO = {
+      ASAP:   { dot: 'bg-rust shadow-[0_0_6px_#b85c4a]', label: 'text-rust' },
+      Medium: { dot: 'bg-warm',                          label: 'text-warm' },
+      Low:    { dot: 'bg-olive-500',                     label: 'text-olive-400' },
+    };
+
+    const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => (
+      { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+    ));
+
+    function renderCard(task) {
+      const isAsap = task.priority === 'ASAP';
+      const style = PRIO[task.priority] || PRIO.Low;
+      const card = document.createElement('div');
+      card.className = `task-card bg-olive-800 border border-olive-700 rounded-sm p-3 cursor-pointer ${isAsap ? 'is-asap min-w-[240px]' : ''}`;
+      card.innerHTML = `
+        <div class="flex items-start gap-2 mb-1.5">
+          <span class="w-1.5 h-1.5 rounded-full ${style.dot} mt-[7px] flex-shrink-0"></span>
+          <span class="text-sm text-olive-100 leading-snug flex-1 break-words">${escapeHTML(task.title || 'Untitled')}</span>
+        </div>
+        <div class="flex items-center justify-between text-[0.6rem] tracking-[0.15em] pl-3.5">
+          <span class="text-olive-500">${escapeHTML(task.dueDate || '—')}</span>
+          <span class="${style.label} uppercase">${escapeHTML(task.priority || '—')}</span>
+        </div>
+      `;
+      card.onclick = () => openEdit(task);
+      return card;
+    }
+
+    function openEdit(task) {
+      selectedTaskId = task.id;
+      $('taskTitle').value = task.title || '';
+      $('taskDueDate').value = task.dueDate || '';
+      $('taskDesc').value = task.description || '';
+      $('taskPriority').value = task.priority || 'Medium';
+      $('modalTitle').textContent = '◉ EDIT TASK';
+      $('completeBtn').classList.remove('hidden');
+      $('confirmDeleteBox').classList.add('hidden');
+      $('overlay').classList.remove('hidden');
+      setTimeout(() => $('taskTitle').focus(), 50);
+    }
+
+    function openCreate() {
+      selectedTaskId = null;
+      $('taskTitle').value = '';
+      $('taskDueDate').value = '';
+      $('taskDesc').value = '';
+      $('taskPriority').value = 'Medium';
+      $('modalTitle').textContent = '○ NEW TASK';
+      $('completeBtn').classList.add('hidden');
+      $('confirmDeleteBox').classList.add('hidden');
+      $('overlay').classList.remove('hidden');
+      setTimeout(() => $('taskTitle').focus(), 50);
+    }
+
+    function cancelEdit() {
+      $('overlay').classList.add('hidden');
+      $('confirmDeleteBox').classList.add('hidden');
+      selectedTaskId = null;
+    }
 
     async function fetchTasks() {
-      const res = await fetch('/tasks');
-      const data = await res.json();
-      tasks.splice(0, tasks.length, ...data);
-      displayTasks();
+      try {
+        const res = await fetch('/tasks');
+        const data = await res.json();
+        tasks.splice(0, tasks.length, ...data);
+        displayTasks();
+      } catch (e) {
+        console.error('fetch failed', e);
+      }
     }
 
     function displayTasks() {
       const today = new Date();
+      const lastWeekStart   = weekStart(today, -1);
+      const thisWeekStart   = weekStart(today,  0);
+      const nextWeekStart   = weekStart(today,  1);
+      const weekAfterStart  = weekStart(today,  2);
 
-      const getWeekStart = (date, offset) => {
-        const d = new Date(date);
-        d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7)); // Monday start
-        d.setHours(0, 0, 0, 0);
-        return d;
-      };
+      $('past-range').textContent     = `← ${fmtDate(lastWeekStart)}`;
+      $('lastWeek-range').textContent = fmtRange(lastWeekStart);
+      $('thisWeek-range').textContent = fmtRange(thisWeekStart);
+      $('nextWeek-range').textContent = fmtRange(nextWeekStart);
 
-      const formatDate = (date) => {
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      };
+      ['priorityBar', 'past', 'lastWeek', 'thisWeek', 'nextWeek', 'future']
+        .forEach(id => { $(id).innerHTML = ''; });
 
-      const formatDateRange = (startDate) => {
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 6);
-        return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-      };
-
-      const thisWeekStart = getWeekStart(today, 0);
-      const nextWeekStart = getWeekStart(today, 1);
-      const lastWeekStart = getWeekStart(today, -1);
-      const weekAfterNextStart = getWeekStart(today, 2);
-
-      const headings = {
-        past: "Past",
-        lastWeek: `Last Week<br><span class="text-sm text-gray-400">${formatDateRange(lastWeekStart)}</span>`,
-        thisWeek: `This Week<br><span class="text-sm text-gray-400">${formatDateRange(thisWeekStart)}</span>`,
-        nextWeek: `Next Week<br><span class="text-sm text-gray-400">${formatDateRange(nextWeekStart)}</span>`,
-        future: "Future"
-      };
-
-      // Clear and restore headings for all columns (priorityBar and vertical columns)
-      ["priorityBar", "past", "lastWeek", "thisWeek", "nextWeek", "future"].forEach(id => {
-        const container = document.getElementById(id);
-        if (id === "priorityBar") {
-          container.innerHTML = `<h3 class="min-w-[120px] text-lg font-semibold text-red-400">🔥 Priority</h3>`;
-        } else {
-          container.innerHTML = `<h3 class="text-lg font-semibold text-center border-b border-gray-600 pb-2 mb-4">${headings[id]}</h3>`;
-        }
-      });
-
-      tasks.forEach((task) => {
-        const taskDate = new Date(task.dueDate);
-        const taskBox = document.createElement('div');
-        taskBox.className = 'task bg-gray-700 p-4 mb-4 rounded-lg shadow hover:bg-gray-600 transition-colors cursor-pointer';
-        taskBox.innerHTML = `<strong class="text-gray-100">${task.title}</strong><br/><small class="text-gray-400">${task.dueDate} – ${task.priority}</small>`;
-
-        taskBox.onclick = () => {
-          selectedTaskId = task.id;
-          document.getElementById('taskTitle').value = task.title;
-          document.getElementById('taskDueDate').value = task.dueDate;
-          document.getElementById('taskDesc').value = task.description;
-          document.getElementById('taskPriority').value = task.priority;
-          document.getElementById('overlay').classList.remove('hidden');
-        };
-
-        let placed = false;
+      let asapCount = 0;
+      tasks.forEach(task => {
+        const card = renderCard(task);
         if (task.priority === 'ASAP') {
-          document.getElementById('priorityBar').appendChild(taskBox);
-          placed = true;
+          $('priorityBar').appendChild(card);
+          asapCount++;
+          return;
         }
+        const d = new Date(task.dueDate);
+        if (isNaN(d) || d < lastWeekStart)      $('past').appendChild(card);
+        else if (d < thisWeekStart)             $('lastWeek').appendChild(card);
+        else if (d < nextWeekStart)             $('thisWeek').appendChild(card);
+        else if (d < weekAfterStart)            $('nextWeek').appendChild(card);
+        else                                    $('future').appendChild(card);
+      });
 
-        if (!placed) {
-          if (taskDate < lastWeekStart) {
-            document.getElementById('past').appendChild(taskBox);
-          } else if (taskDate >= lastWeekStart && taskDate < thisWeekStart) {
-            document.getElementById('lastWeek').appendChild(taskBox);
-          } else if (taskDate >= thisWeekStart && taskDate < nextWeekStart) {
-            document.getElementById('thisWeek').appendChild(taskBox);
-          } else if (taskDate >= nextWeekStart && taskDate < weekAfterNextStart) {
-            document.getElementById('nextWeek').appendChild(taskBox);
-          } else {
-            document.getElementById('future').appendChild(taskBox);
-          }
+      ['past', 'lastWeek', 'thisWeek', 'nextWeek', 'future'].forEach(id => {
+        const col = $(id);
+        if (col.children.length === 0) {
+          col.innerHTML = '<div class="empty-col">— EMPTY —</div>';
         }
       });
+      if (asapCount === 0) {
+        $('priorityBar').innerHTML = '<div class="empty-col px-4 self-center">— NO PRIORITY TASKS —</div>';
+      }
+
+      $('taskCount').textContent = `${String(tasks.length).padStart(2,'0')} TASK${tasks.length !== 1 ? 'S' : ''}`;
+      $('priorityCount').textContent = String(asapCount).padStart(2, '0');
     }
 
     async function saveTask() {
-      document.getElementById('loadingIndicator').classList.remove('hidden');
-
+      $('loadingIndicator').classList.remove('hidden');
       const task = {
-        title: document.getElementById('taskTitle').value,
-        dueDate: document.getElementById('taskDueDate').value,
-        description: document.getElementById('taskDesc').value,
-        priority: document.getElementById('taskPriority').value
+        title:       $('taskTitle').value,
+        dueDate:     $('taskDueDate').value,
+        description: $('taskDesc').value,
+        priority:    $('taskPriority').value,
       };
 
-      if (selectedTaskId !== null) {
-        const res = await fetch(`/tasks/${selectedTaskId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(task)
-        });
-        if (res.ok) {
-          const index = tasks.findIndex(t => t.id === selectedTaskId);
-          if (index !== -1) tasks[index] = { ...task, id: selectedTaskId };
+      try {
+        if (selectedTaskId) {
+          const res = await fetch(`/tasks/${selectedTaskId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(task),
+          });
+          if (res.ok) {
+            const i = tasks.findIndex(t => t.id === selectedTaskId);
+            if (i !== -1) tasks[i] = { ...task, id: selectedTaskId };
+            displayTasks();
+          }
+        } else {
+          const res = await fetch('/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(task),
+          });
+          if (res.ok) {
+            // Backend doesn't return the new Notion id, so refetch to stay consistent.
+            await fetchTasks();
+          }
         }
-      } else {
-        const res = await fetch('/tasks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(task)
-        });
-        if (res.ok) {
-          const newTask = await res.json();
-          tasks.push({ ...task, id: newTask.id || null });
-        }
+      } finally {
+        $('overlay').classList.add('hidden');
+        $('loadingIndicator').classList.add('hidden');
+        selectedTaskId = null;
       }
-
-      displayTasks();
-      document.getElementById('overlay').classList.add('hidden');
-      document.getElementById('loadingIndicator').classList.add('hidden');
-      selectedTaskId = null;
     }
 
     function markComplete() {
-      if (selectedTaskId !== null) {
-        document.getElementById('confirmDeleteBox').classList.remove('hidden');
+      if (selectedTaskId) $('confirmDeleteBox').classList.remove('hidden');
+    }
+
+    async function confirmDelete(yes) {
+      $('confirmDeleteBox').classList.add('hidden');
+      if (!yes || !selectedTaskId) return;
+      $('loadingIndicator').classList.remove('hidden');
+      try {
+        const res = await fetch(`/tasks/${selectedTaskId}`, { method: 'DELETE' });
+        if (res.ok) {
+          const i = tasks.findIndex(t => t.id === selectedTaskId);
+          if (i !== -1) tasks.splice(i, 1);
+          displayTasks();
+          $('overlay').classList.add('hidden');
+        }
+      } finally {
+        $('loadingIndicator').classList.add('hidden');
+        selectedTaskId = null;
       }
     }
 
-    async function confirmDelete(shouldDelete) {
-      document.getElementById('confirmDeleteBox').classList.add('hidden');
-      if (!shouldDelete || selectedTaskId === null) return;
+    $('createTaskBtn').onclick = openCreate;
+    $('refreshBtn').onclick = fetchTasks;
 
-      document.getElementById('loadingIndicator').classList.remove('hidden');
-      const res = await fetch(`/tasks/${selectedTaskId}`, { method: 'DELETE' });
-      if (res.ok) {
-        const index = tasks.findIndex(t => t.id === selectedTaskId);
-        if (index !== -1) tasks.splice(index, 1);
-        displayTasks();
-        document.getElementById('overlay').classList.add('hidden');
+    document.addEventListener('keydown', (e) => {
+      const open = !$('overlay').classList.contains('hidden');
+      if (e.key === 'Escape' && open) cancelEdit();
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && open) saveTask();
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' && !open) {
+        e.preventDefault();
+        openCreate();
       }
-      document.getElementById('loadingIndicator').classList.add('hidden');
-      selectedTaskId = null;
-    }
-
-    function cancelEdit() {
-      document.getElementById('overlay').classList.add('hidden');
-      selectedTaskId = null;
-    }
-
-    document.getElementById('createTaskBtn').onclick = () => {
-      document.getElementById('overlay').classList.remove('hidden');
-      selectedTaskId = null;
-      document.getElementById('taskTitle').value = '';
-      document.getElementById('taskDueDate').value = '';
-      document.getElementById('taskDesc').value = '';
-      document.getElementById('taskPriority').value = 'Medium';
-    };
-
-    // Show today's date in required format
-    document.getElementById('todayDate').textContent = "Today: " + new Date().toLocaleDateString("en-US", {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
     });
+
+    $('todayDate').textContent = new Date().toLocaleDateString('en-US', {
+      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+    }).toUpperCase();
 
     fetchTasks();
   </script>
